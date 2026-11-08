@@ -1,0 +1,11 @@
+{
+  "background_color": "#ffffff",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "NEXO Educacional",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "NEXO",
+  "start_url": "/",
+  "theme_color": "#ffffff"
+}
