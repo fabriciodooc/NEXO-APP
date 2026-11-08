@@ -1,25 +1,8 @@
 {
   "name": "NEXO Educacional",
   "short_name": "NEXO",
-  "description": "Plataforma Integrada de Gestão e Educacional",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#0f3a61",
-  "orientation": "portrait",
-  "lang": "pt-BR",
-  "icons": [
-    {
-      "src": "https://cdn-icons-png.flaticon.com/512/3135/3135755.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "https://cdn-icons-png.flaticon.com/512/3135/3135755.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
-  ]
+  "theme_color": "#0f3a61"
 }
