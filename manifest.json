@@ -1,8 +1,0 @@
-{
-  "name": "NEXO Educacional",
-  "short_name": "NEXO",
-  "start_url": "./index.html",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#0f3a61"
-}
