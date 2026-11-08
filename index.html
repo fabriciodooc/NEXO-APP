@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NEXO Educacional | Plataforma Integrada de Gestão</title>
+    <!-- Web Manifest Embutido para PWABuilder -->
+    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22background_color%22%3A%22%23ffffff%22%2C%22dir%22%3A%22ltr%22%2C%22display%22%3A%22standalone%22%2C%22name%22%3A%22NEXO%20Educacional%22%2C%22orientation%22%3A%22any%22%2C%22scope%22%3A%22%2F%22%2C%22short_name%22%3A%22NEXO%22%2C%22start_url%22%3A%22%2F%22%2C%22theme_color%22%3A%22%23ffffff%22%7D">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        nexoBlue: '#0f3a61',
+                        nexoGreen: '#22c55e',
+                        nexoTeal: '#0ea5e9',
+                        slateDark: '#0f172a'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .view-section { display: none; width: 100%; }
+        .view-section.active-view { display: block !important; }
+
+        .custom-scroll { -webkit-overflow-scrolling: touch; }
+
+        .role-btn-selected-aluno {
+            background-color: #0ea5e9 !important;
+            color: #ffffff !important;
+            border-color: #0284c7 !important;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+        }
+        .role-btn-selected-prof {
+            background-color: #4f46e5 !important;
+            color: #ffffff !important;
+            border-color: #4338ca !important;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .toast-anim { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-slate-50">
+
+    <!-- TOAST NOTIFICATIONS CONTAINER -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-[9999] flex flex-col gap-2 pointer-events-none max-w-sm w-full px-4"></div>
+
+    <!-- TOP ANNOUNCEMENT BAR -->
+    <div id="top-banner" class="bg-slate-900 text-white text-xs py-2 px-4 text-center font-medium flex items-center justify-center border-b border-slate-800">
+        <div class="flex items-center gap-2">
+            <span class="bg-emerald-500 text-slate-950 font-extrabold px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wider">Educação do Futuro</span>
+            <span class="text-slate-300">NEXO Educacional • Transformando o Ensino e a Gestão Escolar</span>
+        </div>
+    </div>
+
+    <!-- HEADER / NAVIGATION -->
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16 sm:h-20">
+                
+                <!-- BRAND LOGO -->
+                <button onclick="handleLogoClick()" class="flex items-center gap-2.5 group text-left focus:outline-none">
+                    <svg class="w-8 h-8 sm:w-10 sm:h-10 transition-transform duration-300 group-hover:scale-105 shrink-0" viewBox="0 0 100 100" fill="none">
+                        <defs>
+                            <linearGradient id="nexoGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+                                <stop offset="0%" stop-color="#0f3a61" />
+                                <stop offset="50%" stop-color="#0ea5e9" />
+                                <stop offset="100%" stop-color="#22c55e" />
+                            </linearGradient>
+                            <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+                                <feDropShadow dx="1" dy="3" stdDeviation="3" flood-opacity="0.25"/>
+                            </filter>
+                        </defs>
+                        <path d="M 20 75 C 10 55, 15 25, 35 25 C 50 25, 55 45, 65 65 C 75 80, 85 75, 85 60 C 85 40, 70 20, 50 40 C 35 55, 25 75, 20 75 Z" 
+                              stroke="url(#nexoGrad)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none" filter="url(#shadow)" />
+                        <path d="M 35 25 C 50 25, 65 55, 78 70" stroke="#22c55e" stroke-width="6" stroke-linecap="round" fill="none" opacity="0.8" />
+                    </svg>
+                    <div class="flex flex-col">
+                        <span class="text-xl sm:text-2xl font-black tracking-tight text-slate-900 leading-none">NEXO</span>
+                        <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500 mt-0.5">EDUCACIONAL</span>
+                    </div>
+                </button>
+
+                <!-- MENU INSTITUCIONAL & NAVEGAÇÃO -->
+                <nav class="hidden md:flex items-center gap-6 text-xs font-bold text-slate-600">
+                    <a href="#educacao" class="hover:text-indigo-600 transition">Educação & Escola</a>
+                    <a href="#quem-somos" class="hover:text-indigo-600 transition">Quem Somos</a>
+                    <a href="#contato" class="hover:text-indigo-600 transition">Contato</a>
+                </nav>
+
+                <!-- USER SESSION -->
+                <div id="nav-user-bar" class="hidden items-center gap-3">
+                    <div class="text-right hidden sm:block">
+                        <div id="user-display-name" class="text-xs font-black text-slate-900">Nome Usuário</div>
+                        <div id="user-display-role" class="text-[10px] font-bold text-slate-400 uppercase">Perfil</div>
+                    </div>
+
+                    <div id="role-badge-nav" class="px-3 py-1 rounded-xl text-xs font-extrabold flex items-center gap-1.5 bg-slate-100 text-slate-700">
+                        <span id="role-icon">👤</span>
+                        <span id="role-text">Conectado</span>
+                    </div>
+
+                    <button onclick="handleLogout()" title="Encerrar Sessão" class="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl text-xs font-bold transition flex items-center gap-1 border border-rose-200">
+                        <span>🚪</span> <span class="hidden sm:inline">Sair</span>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="flex-1 flex flex-col justify-center">
+
+        <!-- ==================== VIEW 0: TELA INSTITUCIONAL + LOGIN & REGISTRO ==================== -->
+        <div id="view-login" class="view-section active-view py-8 sm:py-12 space-y-12">
+            
+            <!-- SEÇÃO DE APRESENTAÇÃO / HEROBANNER EDUCACIONAL -->
+            <section id="educacao" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-4">
+                <span class="inline-block px-4 py-1.5 bg-indigo-100 text-indigo-700 rounded-full text-xs font-extrabold uppercase tracking-wider">
+                    📚 Conectando Alunos, Professores e Escolas
+                </span>
+                <h1 class="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight max-w-4xl mx-auto">
+                    Transformando o Aprendizado com Tecnologia, Inovação e Afeto.
+                </h1>
+                <p class="text-slate-600 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
+                    A plataforma NEXO Educacional foi criada para simplificar a rotina escolar, permitindo envio de trabalhos, avaliações continuadas, boletins em tempo real e acompanhamento pedagógico completo para a comunidade acadêmica.
+                </p>
+            </section>
+
+            <!-- TELA DE ACESSO (LOGIN / CADASTRO) -->
+            <div class="max-w-md mx-auto px-4 w-full">
+                <div class="bg-white rounded-3xl border border-slate-200 shadow-xl p-5 sm:p-8 space-y-5 w-full">
+                    
+                    <div class="text-center space-y-2">
+                        <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-tr from-indigo-600 via-sky-500 to-emerald-400 text-white flex items-center justify-center text-2xl sm:text-3xl font-bold mx-auto shadow-lg shadow-indigo-200">
+                            🎓
+                        </div>
+                        <h2 class="text-xl sm:text-2xl font-black text-slate-900">Portal de Acesso Escola</h2>
+                        <p class="text-xs text-slate-500">Entre com seu e-mail e senha cadastrados para acessar seu painel.</p>
+                    </div>
+
+                    <!-- SELETOR PRINCIPAL: LOGIN VS REGISTRO -->
+                    <div class="grid grid-cols-2 gap-1 rounded-2xl bg-slate-100 p-1 border border-slate-200">
+                        <button id="tab-btn-login" onclick="switchAuthTab('login')" class="py-2.5 text-xs font-extrabold rounded-xl transition bg-white text-indigo-600 shadow-sm">
+                            🔑 Fazer Login
+                        </button>
+                        <button id="tab-btn-register" onclick="switchAuthTab('register')" class="py-2.5 text-xs font-extrabold rounded-xl transition text-slate-600 hover:text-indigo-600">
+                            ✨ Criar Nova Conta
+                        </button>
+                    </div>
+
+                    <!-- FORMULARIO 1: LOGIN -->
+                    <form id="form-auth-login" onsubmit="handleAuthLogin(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-[10px] font-black uppercase text-slate-500 mb-1">E-mail Cadastrado</label>
+                            <input type="email" id="login-email" required placeholder="seu.email@nexo.edu.br" class="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black uppercase text-slate-500 mb-1">Senha de Acesso</label>
+                            <input type="password" id="login-password" required placeholder="••••••••" class="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                        </div>
+                        <button type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold rounded-xl text-sm transition shadow-md active:scale-98">
+                            🚀 Entrar no Sistema
+                        </button>
+                    </form>
+
+                    <!-- FORMULARIO 2: CADASTRO -->
+                    <form id="form-auth-register" onsubmit="handleAuthRegister(event)" class="space-y-4 hidden">
+                        <div>
+                            <label class="block text-[10px] font-black uppercase text-slate-500 mb-1.5 text-center">Selecione o Tipo de Conta:</label>
+                            <input type="hidden" id="reg-role" value="aluno">
+                            <div class="grid grid-cols-2 gap-2">
+                                <button type="button" id="btn-select-aluno" onclick="setRegisterRole('aluno')" class="py-3 px-2 rounded-xl border border-slate-300 bg-slate-50 text-slate-700 font-extrabold text-xs flex flex-col items-center justify-center gap-1 transition role-btn-selected-aluno">
+                                    <span class="text-base">🎓</span>
+                                    <span>Conta ALUNO</span>
+                                </button>
+                                <button type="button" id="btn-select-prof" onclick="setRegisterRole('professor')" class="py-3 px-2 rounded-xl border border-slate-300 bg-slate-50 text-slate-700 font-extrabold text-xs flex flex-col items-center justify-center gap-1 transition">
+                                    <span class="text-base">👨‍🏫</span>
+                                    <span>Conta PROFESSOR</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-black uppercase text-slate-500 mb-1">Nome Completo</label>
+                            <input type="text" id="reg-nome" required placeholder="Ex: Mariana Silva" class="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black uppercase text-slate-500 mb-1">E-mail de Cadastro</label>
+                            <input type="email" id="reg-email" required placeholder="mariana@nexo.edu.br" class="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black uppercase text-slate-500 mb-1">Criar Senha</label>
+                            <input type="password" id="reg-password" required minlength="4" placeholder="Mínimo 4 caracteres" class="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm outline-none">
+                        </div>
+
+                        <!-- CAMPOS ALUNO -->
+                        <div id="fields-aluno" class="space-y-3">
+                            <div>
+                                <label class="block text-[10px] font-black uppercase text-slate-500 mb-1">Nº Matrícula (Opcional)</label>
+                                <input type="text" id="reg-matricula" placeholder="2026-999" class="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-black uppercase text-slate-500 mb-1">Selecione sua Turma</label>
+                                <select id="reg-turma-aluno" class="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm font-bold bg-white outline-none">
+                                    <option value="9º Ano A">9º Ano A</option>
+                                    <option value="3º Ano B">3º Ano B</option>
+                                    <option value="1º Ano Ensino Médio">1º Ano Ensino Médio</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- CAMPOS PROFESSOR -->
+                        <div id="fields-professor" class="space-y-3 hidden">
+                            <div>
+                                <label class="block text-[10px] font-black uppercase text-slate-500 mb-1">Disciplina Principal</label>
+                                <input type="text" id="reg-disciplina" placeholder="Ex: Física / Matemática" class="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-black uppercase text-slate-500 mb-1">Turma Ministrada</label>
+                                <select id="reg-turma-prof" class="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm font-bold bg-white outline-none">
+                                    <option value="9º Ano A">9º Ano A</option>
+                                    <option value="3º Ano B">3º Ano B</option>
+                                    <option value="1º Ano Ensino Médio">1º Ano Ensino Médio</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-xl text-sm transition shadow-md active:scale-98">
+                            ✨ Finalizar Cadastro e Entrar
+                        </button>
+                    </form>
+
+                </div>
+            </div>
+
+            <!-- SEÇÃO QUEM SOMOS -->
+            <section id="quem-somos" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 bg-white rounded-3xl border border-slate-200 my-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center md:text-left">
+                    <div class="space-y-2 p-4">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-xl font-bold mx-auto md:mx-0">🏫</div>
+                        <h3 class="font-extrabold text-slate-900 text-lg">Nossa Missão</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed">Proporcionar às instituições de ensino uma ferramenta moderna de comunicação, diminuindo barreiras entre a sala de aula e os estudantes.</p>
+                    </div>
+                    <div class="space-y-2 p-4">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-xl font-bold mx-auto md:mx-0">💡</div>
+                        <h3 class="font-extrabold text-slate-900 text-lg">Inovação Docente</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed">Ferramentas para professores elaborarem laudos diagnósticos, publicarem atividades e realizarem correções agilizadas.</p>
+                    </div>
+                    <div class="space-y-2 p-4">
+                        <div class="w-10 h-10 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center text-xl font-bold mx-auto md:mx-0">📈</div>
+                        <h3 class="font-extrabold text-slate-900 text-lg">Foco no Estudante</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed">Acompanhamento contínuo de notas, boletins organizados e canal direto para envio de tarefas e atividades escolares.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SEÇÃO CONTATO -->
+            <section id="contato" class="max-w-4xl mx-auto px-4 w-full py-6">
+                <div class="bg-slate-900 text-white rounded-3xl p-6 sm:p-10 space-y-6">
+                    <div class="text-center space-y-2">
+                        <span class="px-3 py-1 bg-emerald-500/20 text-emerald-300 font-extrabold rounded-full text-[10px] uppercase tracking-wider">Fale Conosco</span>
+                        <h3 class="text-2xl font-black">Entre em Contato com a Equipe Escolar</h3>
+                        <p class="text-xs text-slate-400">Dúvidas sobre matrículas, turmas ou suporte ao sistema? Envie uma mensagem.</p>
+                    </div>
+
+                    <form onsubmit="handleContatoSubmit(event)" class="space-y-4 max-w-lg mx-auto">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[10px] font-black uppercase text-slate-400 mb-1">Seu Nome</label>
+                                <input type="text" required placeholder="Nome completo" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-xs text-white outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-black uppercase text-slate-400 mb-1">E-mail</label>
+                                <input type="email" required placeholder="seu@email.com" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-xs text-white outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black uppercase text-slate-400 mb-1">Mensagem</label>
+                            <textarea rows="3" required placeholder="Como podemos ajudar?" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-xs text-white outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+                        </div>
+                        <button type="submit" class="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-extrabold rounded-xl text-xs transition">
+                            ✉️ Enviar Mensagem
+                        </button>
+                    </form>
+
+                    <div class="pt-4 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-around gap-2 text-center text-xs text-slate-400">
+                        <div>📧 Suporte: <span class="text-white font-bold">contato@nexo.edu.br</span></div>
+                        <div>📞 Telefone: <span class="text-white font-bold">(62) 3353-0000</span></div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- ==================== VIEW 1: PAINEL DO ALUNO ==================== -->
+        <div id="view-aluno" class="view-section py-6">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+                
+                <!-- BANNER DO ALUNO LOGADO -->
+                <div class="bg-gradient-to-r from-emerald-900 via-teal-950 to-slate-900 text-white p-6 rounded-3xl shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <span class="inline-block px-3 py-1 bg-emerald-400/20 border border-emerald-400/30 text-emerald-300 font-black text-[10px] uppercase rounded-md tracking-wider mb-2">🎓 Área do Estudante</span>
+                        <h2 class="text-2xl font-black">Bem-vindo, <span id="aluno-logged-name">Aluno</span>!</h2>
+                        <p id="aluno-logged-info" class="text-slate-300 text-xs sm:text-sm">Turma: - | Matrícula: -</p>
+                    </div>
+                </div>
+
+                <!-- METRICAS DO ALUNO LOGADO -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                        <div>
+                            <span class="text-[10px] font-black uppercase text-slate-400 tracking-wider">Minha Média Geral</span>
+                            <div id="aluno-card-media" class="text-3xl font-black text-emerald-600 mt-1">0.0</div>
+                        </div>
+                        <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-2xl font-bold">📊</div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                        <div>
+                            <span class="text-[10px] font-black uppercase text-slate-400 tracking-wider">Provas Pendentes</span>
+                            <div id="aluno-card-pendentes" class="text-3xl font-black text-sky-600 mt-1">0</div>
+                        </div>
+                        <div class="w-12 h-12 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center text-2xl font-bold">📝</div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                        <div>
+                            <span class="text-[10px] font-black uppercase text-slate-400 tracking-wider">Entregas Avaliadas</span>
+                            <div id="aluno-card-concluidas" class="text-3xl font-black text-indigo-600 mt-1">0</div>
+                        </div>
+                        <div class="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-2xl font-bold">✅</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    
+                    <!-- PROVAS PUBLICADAS PARA A TURMA DELE -->
+                    <div class="lg:col-span-7 space-y-4">
+                        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+                            <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
+                                <div>
+                                    <h3 class="font-extrabold text-slate-900 text-lg">Provas e Atividades da Minha Turma</h3>
+                                    <p class="text-xs font-bold text-indigo-600">Baixe os arquivos e envie suas resoluções</p>
+                                </div>
+                                <span>📥</span>
+                            </div>
+
+                            <div id="aluno-lista-provas-disponiveis" class="space-y-4">
+                                <!-- Injetado via JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BOLETIM E LAUDO INDIVIDUAL -->
+                    <div class="lg:col-span-5 space-y-4">
+                        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+                            <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
+                                <h3 class="font-extrabold text-slate-900 text-lg">📋 Meu Boletim & Notas</h3>
+                                <span>🏅</span>
+                            </div>
+
+                            <div id="aluno-lista-boletim" class="space-y-3">
+                                <!-- Injetado via JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ==================== VIEW 2: PORTAL DO PROFESSOR ==================== -->
+        <div id="view-professor" class="view-section py-6">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+                
+                <!-- BANNER DO PROFESSOR LOGADO -->
+                <div class="bg-gradient-to-r from-slate-900 to-indigo-950 text-white p-6 rounded-3xl shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <span class="inline-block px-3 py-1 bg-sky-500/20 border border-sky-400/30 text-sky-300 font-black text-[10px] uppercase rounded-md tracking-wider mb-2">👨‍🏫 Portal Docente Autenticado</span>
+                        <h2 class="text-2xl font-black">Painel do <span id="prof-logged-name">Professor</span></h2>
+                        <p id="prof-logged-info" class="text-slate-300 text-xs sm:text-sm">Disciplina: - | Turma: -</p>
+                    </div>
+                </div>
+
+                <!-- UPLOAD DE PROVA E CENTRAL DE CORREÇÃO -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    
+                    <!-- FORMULARIO: PUBLICAR NOVA PROVA DA TURMA -->
+                    <div class="lg:col-span-5 bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+                        <div class="flex items-center gap-3 pb-3 border-b border-slate-100">
+                            <div class="w-10 h-10 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center text-xl font-bold">📄</div>
+                            <div>
+                                <h3 class="font-extrabold text-slate-900 text-base">Publicar Arquivo de Prova</h3>
+                                <p class="text-xs text-slate-400">Disponibilize PDFs/Aulas na área dos seus alunos</p>
+                            </div>
+                        </div>
+
+                        <form id="form-publicar-prova" onsubmit="handlePublicarProva(event)" class="space-y-3">
+                            <div>
+                                <label class="block text-[10px] font-black uppercase text-slate-500 mb-1">Título da Prova / Avaliação</label>
+                                <input type="text" id="pub-titulo" required placeholder="Ex: Prova Bimestral de Física" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs outline-none focus:ring-2 focus:ring-sky-500">
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-[10px] font-black uppercase text-slate-500 mb-1">Turma Alvo</label>
+                                    <select id="pub-turma" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-semibold outline-none bg-white">
+                                        <option value="9º Ano A">9º Ano A</option>
+                                        <option value="3º Ano B">3º Ano B</option>
+                                        <option value="1º Ano Ensino Médio">1º Ano Ensino Médio</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-black uppercase text-slate-500 mb-1">Data Limite</label>
+                                    <input type="date" id="pub-data" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs outline-none">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-[10px] font-black uppercase text-slate-500 mb-1">Instruções / Enunciado</label>
+                                <textarea id="pub-descricao" rows="3" required placeholder="Orientação para resolução da prova..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs outline-none"></textarea>
+                            </div>
+
+                            <div>
+                                <label class="block text-[10px] font-black uppercase text-slate-500 mb-1">Anexar Arquivo de Prova (PDF/DOC)</label>
+                                <input type="file" id="pub-arquivo" accept=".pdf,.doc,.docx,.png,.jpg,.txt" class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100 cursor-pointer">
+                            </div>
+
+                            <button type="submit" class="w-full py-3 bg-sky-600 hover:bg-sky-700 text-white font-extrabold rounded-xl text-xs transition shadow-md">
+                                🚀 Publicar Prova para os Alunos
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- PROVAS RECEBIDAS DOS ALUNOS PARA DAR NOTA -->
+                    <div class="lg:col-span-7 bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+                        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center text-xl font-bold">✍️</div>
+                                <div>
+                                    <h3 class="font-extrabold text-slate-900 text-base">Provas Recebidas & Correção</h3>
+                                    <p class="text-xs text-slate-400">Examine o envio dos alunos e dê a nota final</p>
+                                </div>
+                            </div>
+                            <span id="badge-pendentes-count" class="px-2.5 py-1 bg-amber-100 text-amber-800 text-[10px] font-black uppercase rounded-full">0 Para Corrigir</span>
+                        </div>
+
+                        <div id="container-provas-para-corrigir" class="space-y-3 max-h-[420px] overflow-y-auto custom-scroll pr-1">
+                            <!-- Injetado via JS -->
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- LAUDO E RELATORIO ANALITICO DA TURMA -->
+                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                        <div>
+                            <span class="inline-block px-2.5 py-0.5 bg-emerald-100 text-emerald-800 font-black text-[10px] uppercase rounded mb-1">📊 Diagnóstico Completo</span>
+                            <h3 class="text-xl font-black text-slate-900">Laudo Pedagógico de Desempenho</h3>
+                            <p class="text-xs text-slate-400">Rendimento individual e da turma com laudos automáticos.</p>
+                        </div>
+                        <select id="laudo-turma-select" onchange="renderProfDesempenho()" class="px-3 py-2 rounded-xl border border-slate-300 text-xs font-bold bg-slate-50 outline-none">
+                            <option value="9º Ano A">9º Ano A</option>
+                            <option value="3º Ano B">3º Ano B</option>
+                            <option value="1º Ano Ensino Médio">1º Ano Ensino Médio</option>
+                        </select>
+                    </div>
+
+                    <!-- CARDS DE METRICAS DO LAUDO -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                            <span class="text-[10px] font-black uppercase text-slate-400">Média Geral</span>
+                            <div id="laudo-media-turma" class="text-3xl font-black text-indigo-600 mt-1">0.0</div>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-emerald-50/50 border border-emerald-100">
+                            <span class="text-[10px] font-black uppercase text-emerald-600">Taxa Aprovação</span>
+                            <div id="laudo-taxa-aprovacao" class="text-3xl font-black text-emerald-600 mt-1">0%</div>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-sky-50/50 border border-sky-100">
+                            <span class="text-[10px] font-black uppercase text-sky-600">Provas Corrigidas</span>
+                            <div id="laudo-total-provas" class="text-3xl font-black text-sky-600 mt-1">0</div>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-amber-50/50 border border-amber-100">
+                            <span class="text-[10px] font-black uppercase text-amber-600">Alunos em Alerta</span>
+                            <div id="laudo-alunos-alerta" class="text-3xl font-black text-amber-600 mt-1">0</div>
+                        </div>
+                    </div>
+
+                    <!-- TABELA DETALHADA DO LAUDO POR ALUNO -->
+                    <div class="overflow-x-auto rounded-2xl border border-slate-200">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-100 text-slate-700 font-bold uppercase text-[10px]">
+                                <tr>
+                                    <th class="p-3">Aluno</th>
+                                    <th class="p-3">Matrícula</th>
+                                    <th class="p-3">Provas</th>
+                                    <th class="p-3">Média</th>
+                                    <th class="p-3">Laudo Diagnóstico Pedagógico</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-prof-desempenho" class="divide-y divide-slate-100 text-slate-700"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ==================== VIEW 3: PAINEL DE GESTAO / ADMIN ==================== -->
+        <div id="view-admin" class="view-section py-6">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+                
+                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <span class="inline-block px-3 py-1 bg-indigo-100 text-indigo-700 font-black text-[10px] uppercase rounded-md tracking-wider mb-2">🛡️ Módulo de Gestão Geral</span>
+                        <h2 class="text-2xl font-black text-slate-900">Gerenciamento de Contas e Usuários</h2>
+                        <p class="text-slate-500 text-xs sm:text-sm">Controle de acessos, turmas e perfis cadastrados no NEXO Educacional.</p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                        <h3 class="font-extrabold text-slate-900 text-lg">Usuários Cadastrados no Sistema</h3>
+                        <select id="admin-filter-turma" onchange="renderAdminTables()" class="px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-bold bg-slate-50 outline-none">
+                            <option value="todas">Todas as Turmas</option>
+                            <option value="9º Ano A">9º Ano A</option>
+                            <option value="3º Ano B">3º Ano B</option>
+                            <option value="1º Ano Ensino Médio">1º Ano Ensino Médio</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="text-xs font-black uppercase text-slate-500 mb-3 flex items-center justify-between">
+                                <span>👨‍🏫 Professores Registrados</span>
+                                <span id="count-prof-badge" class="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full text-[10px]">0</span>
+                            </h4>
+                            <div class="overflow-x-auto rounded-xl border border-slate-200">
+                                <table class="w-full text-left text-xs">
+                                    <thead class="bg-slate-100 text-slate-700 font-bold uppercase text-[10px]">
+                                        <tr>
+                                            <th class="p-3">Nome / E-mail</th>
+                                            <th class="p-3">Disciplina</th>
+                                            <th class="p-3">Turma</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="table-professores" class="divide-y divide-slate-100 text-slate-700"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 class="text-xs font-black uppercase text-slate-500 mb-3 flex items-center justify-between">
+                                <span>🎓 Alunos Registrados</span>
+                                <span id="count-aluno-badge" class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full text-[10px]">0</span>
+                            </h4>
+                            <div class="overflow-x-auto rounded-xl border border-slate-200">
+                                <table class="w-full text-left text-xs">
+                                    <thead class="bg-slate-100 text-slate-700 font-bold uppercase text-[10px]">
+                                        <tr>
+                                            <th class="p-3">Aluno</th>
+                                            <th class="p-3">Matrícula</th>
+                                            <th class="p-3">Turma</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="table-alunos" class="divide-y divide-slate-100 text-slate-700"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-900 text-slate-400 py-6 border-t border-slate-800 text-xs mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <svg class="w-6 h-6" viewBox="0 0 100 100" fill="none">
+                    <path d="M 20 75 C 10 55, 15 25, 35 25 C 50 25, 55 45, 65 65 C 75 80, 85 75, 85 60 C 85 40, 70 20, 50 40 C 35 55, 25 75, 20 75 Z" stroke="url(#nexoGrad)" stroke-width="12" fill="none" />
+                </svg>
+                <span class="font-black text-white text-sm tracking-tight">NEXO <span class="text-emerald-400 font-normal">EDUCACIONAL</span></span>
+            </div>
+            <p>&copy; 2026 NEXO Educational Systems. Plataforma voltada ao Ensino e Gestão Escolar.</p>
+        </div>
+    </footer>
+
+    <!-- ENGINE JAVASCRIPT PRINCIPAL -->
+    <script>
+        const SEED_DATA = {
+            usuarios: [
+                { id: 'u_admin', email: 'admin@nexo.edu.br', password: '123', role: 'admin', nome: 'Administrador Diretor', turma: 'todas' },
+                { id: 'u_prof1', email: 'carlos@nexo.edu.br', password: '123', role: 'professor', nome: 'Prof. Carlos Eduardo', disciplina: 'Matemática', turma: '9º Ano A' },
+                { id: 'u_aluno1', email: 'lucas@aluno.nexo.edu.br', password: '123', role: 'aluno', nome: 'Lucas Costa', matricula: '2026-001', turma: '9º Ano A' }
+            ],
+            provasPublicadas: [],
+            respostasAlunos: [],
+            sessionUser: null
+        };
+
+        function getDB() {
+            const stored = localStorage.getItem('nexo_auth_db');
+            if (!stored) {
+                localStorage.setItem('nexo_auth_db', JSON.stringify(SEED_DATA));
+                return SEED_DATA;
+            }
+            try { return JSON.parse(stored); } catch (e) { return SEED_DATA; }
+        }
+
+        function saveDB(db) {
+            localStorage.setItem('nexo_auth_db', JSON.stringify(db));
+            refreshCurrentViewState();
+        }
+
+        function getCurrentUser() {
+            return getDB().sessionUser;
+        }
+
+        function handleAuthLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value.trim();
+            const pass = document.getElementById('login-password').value.trim();
+            const db = getDB();
+
+            const user = db.usuarios.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === pass);
+
+            if (!user) {
+                showToast('E-mail ou senha incorretos!', 'error');
+                return;
+            }
+
+            db.sessionUser = user;
+            saveDB(db);
+            showToast(`Bem-vindo(a), ${user.nome}!`);
+            redirectUserToRoleView(user);
+        }
+
+        function setRegisterRole(role) {
+            document.getElementById('reg-role').value = role;
+            const btnAluno = document.getElementById('btn-select-aluno');
+            const btnProf = document.getElementById('btn-select-prof');
+            const alunoFields = document.getElementById('fields-aluno');
+            const profFields = document.getElementById('fields-professor');
+
+            if (role === 'aluno') {
+                btnAluno.className = 'py-3 px-2 rounded-xl border border-slate-300 bg-slate-50 text-slate-700 font-extrabold text-xs flex flex-col items-center justify-center gap-1 transition role-btn-selected-aluno';
+                btnProf.className = 'py-3 px-2 rounded-xl border border-slate-300 bg-slate-50 text-slate-700 font-extrabold text-xs flex flex-col items-center justify-center gap-1 transition';
+                alunoFields.classList.remove('hidden');
+                profFields.classList.add('hidden');
+            } else {
+                btnProf.className = 'py-3 px-2 rounded-xl border border-slate-300 bg-slate-50 text-slate-700 font-extrabold text-xs flex flex-col items-center justify-center gap-1 transition role-btn-selected-prof';
+                btnAluno.className = 'py-3 px-2 rounded-xl border border-slate-300 bg-slate-50 text-slate-700 font-extrabold text-xs flex flex-col items-center justify-center gap-1 transition';
+                alunoFields.classList.add('hidden');
+                profFields.classList.remove('hidden');
+            }
+        }
+
+        function handleAuthRegister(e) {
+            e.preventDefault();
+            const db = getDB();
+            const role = document.getElementById('reg-role').value;
+            const email = document.getElementById('reg-email').value.trim();
+
+            if (db.usuarios.some(u => u.email.toLowerCase() === email.toLowerCase())) {
+                showToast('Este e-mail já está cadastrado.', 'error');
+                return;
+            }
+
+            const newUser = {
+                id: 'u_' + Date.now(),
+                nome: document.getElementById('reg-nome').value.trim(),
+                email: email,
+                password: document.getElementById('reg-password').value.trim(),
+                role: role,
+                turma: role === 'aluno' ? document.getElementById('reg-turma-aluno').value : document.getElementById('reg-turma-prof').value
+            };
+
+            if (role === 'aluno') {
+                newUser.matricula = document.getElementById('reg-matricula').value.trim() || '2026-REC';
+            } else {
+                newUser.disciplina = document.getElementById('reg-disciplina').value.trim() || 'Geral';
+            }
+
+            db.usuarios.push(newUser);
+            db.sessionUser = newUser;
+            saveDB(db);
+            showToast('Conta criada com sucesso! Logado automaticamente.');
+            redirectUserToRoleView(newUser);
+        }
+
+        function handleLogout() {
+            const db = getDB();
+            db.sessionUser = null;
+            saveDB(db);
+            showToast('Sessão encerrada.');
+            switchView('login');
+        }
+
+        function redirectUserToRoleView(user) {
+            if (!user) { switchView('login'); return; }
+            if (user.role === 'aluno') switchView('aluno');
+            else if (user.role === 'professor') switchView('professor');
+            else if (user.role === 'admin') switchView('admin');
+        }
+
+        function handleLogoClick() {
+            const user = getCurrentUser();
+            if (user) redirectUserToRoleView(user);
+            else switchView('login');
+        }
+
+        function switchView(viewName) {
+            const user = getCurrentUser();
+
+            if (!user && viewName !== 'login') {
+                viewName = 'login';
+            }
+
+            if (user) {
+                if (user.role === 'aluno' && viewName !== 'aluno') viewName = 'aluno';
+                else if (user.role === 'professor' && viewName !== 'professor') viewName = 'professor';
+            }
+
+            const sections = document.querySelectorAll('.view-section');
+            sections.forEach(sec => sec.classList.remove('active-view'));
+
+            const target = document.getElementById(`view-${viewName}`);
+            if (target) target.classList.add('active-view');
+
+            updateHeaderUserBar(user);
+            refreshCurrentViewState();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function updateHeaderUserBar(user) {
+            const userBar = document.getElementById('nav-user-bar');
+            const nameEl = document.getElementById('user-display-name');
+            const roleEl = document.getElementById('user-display-role');
+            const badgeNav = document.getElementById('role-badge-nav');
+            const roleIcon = document.getElementById('role-icon');
+            const roleText = document.getElementById('role-text');
+
+            if (user) {
+                userBar.classList.remove('hidden');
+                userBar.classList.add('flex');
+                nameEl.textContent = user.nome;
+                roleEl.textContent = user.role.toUpperCase();
+
+                if (user.role === 'aluno') {
+                    roleIcon.textContent = '🎓';
+                    roleText.textContent = 'Aluno';
+                    badgeNav.className = 'px-3 py-1 rounded-xl text-xs font-extrabold flex items-center gap-1.5 bg-emerald-100 text-emerald-800';
+                } else if (user.role === 'professor') {
+                    roleIcon.textContent = '👨‍🏫';
+                    roleText.textContent = 'Professor';
+                    badgeNav.className = 'px-3 py-1 rounded-xl text-xs font-extrabold flex items-center gap-1.5 bg-indigo-100 text-indigo-800';
+                } else {
+                    roleIcon.textContent = '🛡️';
+                    roleText.textContent = 'Admin';
+                    badgeNav.className = 'px-3 py-1 rounded-xl text-xs font-extrabold flex items-center gap-1.5 bg-slate-200 text-slate-800';
+                }
+            } else {
+                userBar.classList.add('hidden');
+            }
+        }
+
+        function switchAuthTab(tab) {
+            const loginForm = document.getElementById('form-auth-login');
+            const regForm = document.getElementById('form-auth-register');
+            const btnLogin = document.getElementById('tab-btn-login');
+            const btnReg = document.getElementById('tab-btn-register');
+
+            if (tab === 'login') {
+                loginForm.classList.remove('hidden');
+                regForm.classList.add('hidden');
+                btnLogin.className = 'py-2.5 text-xs font-extrabold rounded-xl transition bg-white text-indigo-600 shadow-sm';
+                btnReg.className = 'py-2.5 text-xs font-extrabold rounded-xl transition text-slate-600 hover:text-indigo-600';
+            } else {
+                loginForm.classList.add('hidden');
+                regForm.classList.remove('hidden');
+                btnReg.className = 'py-2.5 text-xs font-extrabold rounded-xl transition bg-white text-indigo-600 shadow-sm';
+                btnLogin.className = 'py-2.5 text-xs font-extrabold rounded-xl transition text-slate-600 hover:text-indigo-600';
+            }
+        }
+
+        function handleContatoSubmit(e) {
+            e.preventDefault();
+            showToast('Sua mensagem de contato foi enviada para a secretaria escolar!');
+            e.target.reset();
+        }
+
+        function renderAlunoView() {
+            const user = getCurrentUser();
+            if (!user || user.role !== 'aluno') return;
+
+            document.getElementById('aluno-logged-name').textContent = user.nome;
+            document.getElementById('aluno-logged-info').textContent = `Turma: ${user.turma} | Matrícula: ${user.matricula || 'N/A'}`;
+
+            const db = getDB();
+            const provasTurma = db.provasPublicadas.filter(p => p.turma === user.turma);
+            const containerProvas = document.getElementById('aluno-lista-provas-disponiveis');
+
+            if (provasTurma.length === 0) {
+                containerProvas.innerHTML = `<div class="p-6 text-center text-slate-400 text-xs">Nenhuma prova cadastrada para sua turma no momento.</div>`;
+            } else {
+                containerProvas.innerHTML = provasTurma.map(prv => {
+                    const respostaExistente = db.respostasAlunos.find(r => r.provaId === prv.id && r.alunoId === user.id);
+
+                    return `
+                        <div class="p-4 rounded-2xl border border-slate-200 bg-slate-50/50 space-y-3">
+                            <div class="flex items-start justify-between gap-2">
+                                <div>
+                                    <span class="px-2 py-0.5 bg-indigo-100 text-indigo-700 font-bold rounded text-[10px]">${prv.disciplina}</span>
+                                    <h4 class="font-extrabold text-slate-900 text-sm mt-1">${prv.titulo}</h4>
+                                    <p class="text-xs text-slate-400">Professor: ${prv.professorNome} • Prazo: ${prv.dataEntrega}</p>
+                                </div>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${respostaExistente ? 'bg-emerald-100 text-emerald-800' : 'bg-sky-100 text-sky-800'}">
+                                    ${respostaExistente ? 'Enviado' : 'Disponível'}
+                                </span>
+                            </div>
+
+                            <p class="text-xs text-slate-600 bg-white p-3 rounded-xl border border-slate-100">${prv.descricao}</p>
+
+                            ${prv.arquivoNome ? `
+                                <div class="flex items-center justify-between p-3 bg-indigo-50/60 rounded-xl border border-indigo-100 text-xs">
+                                    <span class="font-bold text-indigo-900">📄 ${prv.arquivoNome}</span>
+                                    ${prv.arquivoData ? `<a href="${prv.arquivoData}" download="${prv.arquivoNome}" class="px-3 py-1 bg-indigo-600 text-white font-bold text-[10px] rounded-lg shadow-sm">Baixar Prova</a>` : ''}
+                                </div>
+                            ` : ''}
+
+                            <div class="pt-2 border-t border-slate-200">
+                                ${respostaExistente ? `
+                                    <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-xs space-y-1">
+                                        <p class="font-bold text-emerald-900">Sua resposta foi entregue!</p>
+                                        <p class="text-emerald-700 italic">"${respostaExistente.textoResposta}"</p>
+                                    </div>
+                                ` : `
+                                    <form onsubmit="handleEnviarRespostaAluno(event, '${prv.id}')" class="space-y-3">
+                                        <div>
+                                            <label class="block text-[10px] font-black uppercase text-slate-500 mb-1">Sua Resposta</label>
+                                            <textarea id="ans-text-${prv.id}" rows="2" required placeholder="Escreva aqui sua resposta..." class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs outline-none bg-white"></textarea>
+                                        </div>
+                                        <div>
+                                            <label class="block text-[10px] font-black uppercase text-slate-500 mb-1">Anexar Arquivo (Opcional)</label>
+                                            <input type="file" id="ans-file-${prv.id}" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-emerald-50 file:text-emerald-700">
+                                        </div>
+                                        <button type="submit" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-xl text-xs transition shadow">
+                                            📤 Entregar Prova Concluída
+                                        </button>
+                                    </form>
+                                `}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            const minhasRespostas = db.respostasAlunos.filter(r => r.alunoId === user.id);
+            const containerBoletim = document.getElementById('aluno-lista-boletim');
+            const corrigidas = minhasRespostas.filter(r => r.corrigido);
+            const media = corrigidas.length > 0 ? (corrigidas.reduce((a, c) => a + c.nota, 0) / corrigidas.length).toFixed(1) : '0.0';
+
+            document.getElementById('aluno-card-media').textContent = media;
+            document.getElementById('aluno-card-pendentes').textContent = provasTurma.length - minhasRespostas.length;
+            document.getElementById('aluno-card-concluidas').textContent = minhasRespostas.length;
+
+            if (minhasRespostas.length === 0) {
+                containerBoletim.innerHTML = `<div class="p-6 text-center text-slate-400 text-xs">Nenhuma resposta enviada ainda.</div>`;
+            } else {
+                containerBoletim.innerHTML = minhasRespostas.map(resp => {
+                    const prv = db.provasPublicadas.find(p => p.id === resp.provaId) || {};
+                    return `
+                        <div class="p-4 rounded-2xl border ${resp.corrigido ? (resp.nota >= 6 ? 'border-emerald-200 bg-emerald-50/30' : 'border-rose-200 bg-rose-50/30') : 'border-slate-200 bg-slate-50'} flex justify-between items-start">
+                            <div>
+                                <span class="text-[10px] font-black uppercase text-slate-400">${prv.disciplina || 'Geral'}</span>
+                                <h5 class="font-extrabold text-slate-900 text-sm">${prv.titulo || 'Avaliação'}</h5>
+                                <p class="text-xs text-slate-500 italic mt-1">"${resp.feedback || 'Aguardando correção.'}"</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-2xl font-black ${resp.corrigido ? (resp.nota >= 6 ? 'text-emerald-600' : 'text-rose-600') : 'text-slate-400'}">
+                                    ${resp.corrigido ? resp.nota.toFixed(1) : '--'}
+                                </span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        function handleEnviarRespostaAluno(e, provaId) {
+            e.preventDefault();
+            const db = getDB();
+            const user = getCurrentUser();
+
+            const textoAns = document.getElementById(`ans-text-${provaId}`).value.trim();
+            const fileInput = document.getElementById(`ans-file-${provaId}`);
+            const file = fileInput.files[0];
+
+            function saveResponse(fileUrl = null, fileName = null) {
+                db.respostasAlunos.push({
+                    id: 'resp_' + Date.now(),
+                    provaId: provaId,
+                    alunoId: user.id,
+                    alunoNome: user.nome,
+                    turma: user.turma,
+                    textoResposta: textoAns,
+                    arquivoRespostaNome: fileName,
+                    arquivoRespostaData: fileUrl,
+                    dataEnvio: new Date().toISOString().split('T')[0],
+                    nota: 0,
+                    feedback: '',
+                    corrigido: false
+                });
+                saveDB(db);
+                showToast('Resposta enviada com sucesso!');
+            }
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    saveResponse(event.target.result, file.name);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                saveResponse();
+            }
+        }
+
+        function renderProfView() {
+            const user = getCurrentUser();
+            if (!user || user.role !== 'professor') return;
+
+            document.getElementById('prof-logged-name').textContent = user.nome;
+            document.getElementById('prof-logged-info').textContent = `Disciplina: ${user.disciplina || 'Geral'} | Turma: ${user.turma || 'Geral'}`;
+
+            renderProvasParaCorrigir();
+            renderProfDesempenho();
+        }
+
+        function handlePublicarProva(e) {
+            e.preventDefault();
+            const db = getDB();
+            const user = getCurrentUser();
+            const fileInput = document.getElementById('pub-arquivo');
+            const file = fileInput.files[0];
+
+            function saveProvaObj(fileUrl = null, fileName = null) {
+                db.provasPublicadas.push({
+                    id: 'prv_' + Date.now(),
+                    titulo: document.getElementById('pub-titulo').value.trim(),
+                    disciplina: user.disciplina || 'Geral',
+                    turma: document.getElementById('pub-turma').value,
+                    professorNome: user.nome,
+                    dataEntrega: document.getElementById('pub-data').value,
+                    descricao: document.getElementById('pub-descricao').value.trim(),
+                    arquivoNome: fileName,
+                    arquivoData: fileUrl
+                });
+                saveDB(db);
+                document.getElementById('form-publicar-prova').reset();
+                showToast('Prova publicada na aba dos alunos!');
+            }
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    saveProvaObj(event.target.result, file.name);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                saveProvaObj();
+            }
+        }
+
+        function renderProvasParaCorrigir() {
+            const db = getDB();
+            const container = document.getElementById('container-provas-para-corrigir');
+            const pendentesBadge = document.getElementById('badge-pendentes-count');
+
+            const pendentes = db.respostasAlunos.filter(r => !r.corrigido);
+            pendentesBadge.textContent = `${pendentes.length} Pendentes`;
+
+            if (db.respostasAlunos.length === 0) {
+                container.innerHTML = `<div class="p-6 text-center text-slate-400 text-xs">Nenhuma resposta entregue pelos alunos ainda.</div>`;
+                return;
+            }
+
+            container.innerHTML = db.respostasAlunos.map(resp => {
+                const provaInfo = db.provasPublicadas.find(p => p.id === resp.provaId) || {};
+                
+                return `
+                    <div class="p-4 rounded-2xl border ${resp.corrigido ? 'border-slate-200 bg-slate-50/50' : 'border-amber-200 bg-amber-50/30'} space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <span class="text-[10px] font-black uppercase text-slate-400">${resp.turma} • ${provaInfo.titulo || 'Prova'}</span>
+                                <h4 class="font-extrabold text-slate-900 text-sm">${resp.alunoNome}</h4>
+                            </div>
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${resp.corrigido ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+                                ${resp.corrigido ? `Nota: ${resp.nota}` : 'Para Corrigir'}
+                            </span>
+                        </div>
+
+                        <div class="p-3 bg-white rounded-xl border border-slate-100 text-xs text-slate-700">
+                            <p class="font-semibold text-slate-800 mb-1">Resposta do Aluno:</p>
+                            <p class="italic">${resp.textoResposta || 'Sem texto.'}</p>
+                            ${resp.arquivoRespostaNome ? `
+                                <div class="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-indigo-600 font-bold">
+                                    <span>📎 Arquivo: ${resp.arquivoRespostaNome}</span>
+                                    ${resp.arquivoRespostaData ? `<a href="${resp.arquivoRespostaData}" download="${resp.arquivoRespostaNome}" class="text-[10px] underline">Baixar Arquivo</a>` : ''}
+                                </div>
+                            ` : ''}
+                        </div>
+
+                        <div class="pt-2 flex flex-col sm:flex-row gap-2">
+                            <input type="number" id="nota-input-${resp.id}" min="0" max="10" step="0.5" placeholder="Nota (0-10)" value="${resp.nota !== undefined ? resp.nota : ''}" class="w-full sm:w-28 px-3 py-2 rounded-xl border border-slate-300 text-xs font-bold outline-none">
+                            <input type="text" id="feedback-input-${resp.id}" placeholder="Feedback / parecer..." value="${resp.feedback || ''}" class="flex-1 px-3 py-2 rounded-xl border border-slate-300 text-xs outline-none">
+                            <button onclick="salvarCorrecaoProf('${resp.id}')" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs transition">
+                                Salvar Nota
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function salvarCorrecaoProf(respostaId) {
+            const db = getDB();
+            const resp = db.respostasAlunos.find(r => r.id === respostaId);
+            if (!resp) return;
+
+            const notaVal = parseFloat(document.getElementById(`nota-input-${respostaId}`).value);
+            const feedbackVal = document.getElementById(`feedback-input-${respostaId}`).value.trim();
+
+            if (isNaN(notaVal) || notaVal < 0 || notaVal > 10) {
+                showToast('Informe uma nota entre 0 e 10.', 'error');
+                return;
+            }
+
+            resp.nota = notaVal;
+            resp.feedback = feedbackVal || 'Prova avaliada.';
+            resp.corrigido = true;
+
+            saveDB(db);
+            showToast(`Nota ${notaVal} atribuída a ${resp.alunoNome}!`);
+        }
+
+        function renderProfDesempenho() {
+            const db = getDB();
+            const turmaSel = document.getElementById('laudo-turma-select').value;
+            
+            const alunosTurma = db.usuarios.filter(u => u.role === 'aluno' && u.turma === turmaSel);
+            const respostasTurma = db.respostasAlunos.filter(r => r.turma === turmaSel && r.corrigido);
+
+            const total = respostasTurma.length;
+            const soma = respostasTurma.reduce((acc, c) => acc + c.nota, 0);
+            const mediaTurma = total > 0 ? (soma / total).toFixed(1) : '0.0';
+            const aprovados = respostasTurma.filter(r => r.nota >= 6.0).length;
+            const taxaAprov = total > 0 ? Math.round((aprovados / total) * 100) + '%' : '100%';
+
+            let alertas = 0;
+
+            document.getElementById('laudo-media-turma').textContent = mediaTurma;
+            document.getElementById('laudo-taxa-aprovacao').textContent = taxaAprov;
+            document.getElementById('laudo-total-provas').textContent = total;
+
+            const tbody = document.getElementById('table-prof-desempenho');
+
+            if (alunosTurma.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400">Nenhum aluno nesta turma.</td></tr>`;
+                document.getElementById('laudo-alunos-alerta').textContent = '0';
+                return;
+            }
+
+            tbody.innerHTML = alunosTurma.map(aluno => {
+                const respostasAluno = db.respostasAlunos.filter(r => r.alunoId === aluno.id && r.corrigido);
+                const qtd = respostasAluno.length;
+                const mediaNum = qtd > 0 ? (respostasAluno.reduce((a, c) => a + c.nota, 0) / qtd) : null;
+                const mediaStr = mediaNum !== null ? mediaNum.toFixed(1) : 'N/A';
+
+                if (mediaNum !== null && mediaNum < 6.0) alertas++;
+
+                let parecer = '';
+                let badge = '';
+
+                if (mediaNum === null) {
+                    parecer = 'Sem avaliações suficientes no sistema.';
+                    badge = '<span class="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-[10px] font-bold">Sem Notas</span>';
+                } else if (mediaNum >= 8.0) {
+                    parecer = 'Desempenho excelente. Domínio satisfatório dos conteúdos.';
+                    badge = '<span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded text-[10px] font-bold">Excelente</span>';
+                } else if (mediaNum >= 6.0) {
+                    parecer = 'Rendimento adequado. Recomenda-se manter a rotina de estudos.';
+                    badge = '<span class="px-2 py-0.5 bg-sky-100 text-sky-800 rounded text-[10px] font-bold">Aprovado</span>';
+                } else {
+                    parecer = 'Atenção pedagógica necessária: Nota média abaixo do mínimo.';
+                    badge = '<span class="px-2 py-0.5 bg-rose-100 text-rose-800 rounded text-[10px] font-bold">Reforço Requerido</span>';
+                }
+
+                return `
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-3 font-bold">${aluno.nome}</td>
+                        <td class="p-3 font-mono">${aluno.matricula || 'N/A'}</td>
+                        <td class="p-3">${qtd} prova(s)</td>
+                        <td class="p-3 font-black text-sm">${mediaStr}</td>
+                        <td class="p-3">
+                            <div class="space-y-1">
+                                <div>${badge}</div>
+                                <p class="text-[11px] text-slate-600">${parecer}</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            document.getElementById('laudo-alunos-alerta').textContent = alertas;
+        }
+
+        function renderAdminTables() {
+            const db = getDB();
+            const filterTurma = document.getElementById('admin-filter-turma').value;
+
+            const profs = db.usuarios.filter(u => u.role === 'professor' && (filterTurma === 'todas' || u.turma === filterTurma));
+            const alunos = db.usuarios.filter(u => u.role === 'aluno' && (filterTurma === 'todas' || u.turma === filterTurma));
+
+            document.getElementById('count-prof-badge').textContent = profs.length;
+            document.getElementById('count-aluno-badge').textContent = alunos.length;
+
+            const profTbody = document.getElementById('table-professores');
+            profTbody.innerHTML = profs.map(p => `
+                <tr class="hover:bg-slate-50">
+                    <td class="p-3 font-bold">${p.nome}<br><span class="text-[10px] text-slate-400 font-normal">${p.email}</span></td>
+                    <td class="p-3">${p.disciplina || 'Geral'}</td>
+                    <td class="p-3"><span class="px-2 py-0.5 bg-indigo-50 text-indigo-700 font-bold rounded text-[10px]">${p.turma}</span></td>
+                </tr>
+            `).join('');
+
+            const alunoTbody = document.getElementById('table-alunos');
+            alunoTbody.innerHTML = alunos.map(a => `
+                <tr class="hover:bg-slate-50">
+                    <td class="p-3 font-bold">${a.nome}<br><span class="text-[10px] text-slate-400 font-normal">${a.email}</span></td>
+                    <td class="p-3 font-mono">${a.matricula || 'N/A'}</td>
+                    <td class="p-3"><span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 font-bold rounded text-[10px]">${a.turma}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function refreshCurrentViewState() {
+            const user = getCurrentUser();
+            if (user) {
+                if (user.role === 'aluno') renderAlunoView();
+                else if (user.role === 'professor') renderProfView();
+                else if (user.role === 'admin') renderAdminTables();
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast-anim p-4 rounded-xl text-xs font-bold text-white shadow-xl flex items-center gap-2 pointer-events-auto ${type === 'success' ? 'bg-emerald-600' : 'bg-rose-600'}`;
+            toast.innerHTML = `<span>${type === 'success' ? '✅' : '⚠️'}</span> <span>${message}</span>`;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const user = getCurrentUser();
+            if (user) {
+                redirectUserToRoleView(user);
+            } else {
+                switchView('login');
+            }
+        });
+    </script>
+</body>
+</html>
